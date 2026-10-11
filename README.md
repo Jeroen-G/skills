@@ -86,6 +86,14 @@ npx skills add jeroen-g/skills@entity-diff
 
 : turn a conversation into a spec.
 
+## OpenCode auto-update plugin
+
+`plugins/skills-update.ts` is a small OpenCode V2 plugin that keeps your installed skills up to date.
+OpenCode has no built-in updater for skills installed with `npx skills`, so this fills the gap.
+On load (and on each new session) it runs `npx -y skills update -g -y`, at most once a day, then reloads OpenCode's skill registry so updated skills are picked up without a restart.
+It updates **global** installs only; project-scoped installs are left alone.
+To install, copy the file to your OpenCode plugins directory, then restart the OpenCode service.
+
 ## Credits
 
 The majority of the skills are (slightly) adapted versions of skills created by others such as [Matt Pocock](https://github.com/mattpocock/skills).
