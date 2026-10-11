@@ -20,55 +20,71 @@ npx skills add jeroen-g/skills@entity-diff
 
 ### Curated
 
+**agent-docs**
+
+: generate or maintain a repo's agent docs (context map, glossary, ADRs).
+
 **atlassian**
 
-: look up or search Jira issues and Confluence pages via `atlassian-cli`
+: look up or search Jira issues and Confluence pages via `atlassian-cli`.
 
 **caveman**
 
-: ultra-compressed communication mode
+: ultra-compressed communication mode.
+
+**codebase-design**
+
+: shared vocabulary for designing deep modules.
 
 **dex**
 
-: task management via the `dex` CLI
+: task management via the `dex` CLI.
+
+**domain-modeling**
+
+: build and sharpen a project's domain model (glossary, ubiquitous language, ADRs).
 
 **feature-ticket-to-tasks**
 
-: break a feature ticket into Dex tasks
+: break a feature ticket into Dex tasks.
+
+**gitlab**
+
+: GitLab CLI (`glab`) for working with GitLab from the command line (merge requests, issues, discussions, CI/CD, API).
 
 **grill-me**
 
-: stress-test a plan or design
+: stress-test a plan or design.
 
 **request-refactor-plan**
 
-: create a refactor plan
+: create a refactor plan.
 
 **retro**
 
-: retrospective on a coding session
+: retrospective on a coding session.
 
 **write-feature-ticket**
 
-: turn a JIRA ticket into a feature ticket
+: turn a JIRA ticket into a feature ticket.
 
 **writing-for-agents**
 
-: writing docs agents consume (skills, `AGENTS.md`, `CLAUDE.md`)
+: writing docs agents consume (skills, `AGENTS.md`, `CLAUDE.md`).
 
 ### Experimental
 
 **entity-diff**
 
-: entity-level view of code changes via the `sem` CLI
+: entity-level view of code changes via the `sem` CLI.
 
 **show-me**
 
-: explain a topic visually with diagrams, sketches, and HTML artifacts
+: explain a topic visually with diagrams, sketches, and HTML artifacts.
 
 **to-spec**
 
-: turn a conversation into a spec
+: turn a conversation into a spec.
 
 ## Credits
 
