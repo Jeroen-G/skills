@@ -1,0 +1,15 @@
+{
+  "skill_name": "dex",
+  "evals": [
+    {
+      "id": 1,
+      "name": "Example test case",
+      "prompt": "How many tasks have been completed?",
+      "expected_output": "9",
+      "files": [],
+      "assertions": [
+        "must have called the dex CLI"
+      ]
+    }
+  ]
+}
