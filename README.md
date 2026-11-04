@@ -78,6 +78,10 @@ npx skills add jeroen-g/skills@entity-diff
 
 : entity-level view of code changes via the `sem` CLI.
 
+**implement-frontend-architecture**
+
+: structure and place frontend code into layered folders (core, features, screens).
+
 **show-me**
 
 : explain a topic visually with diagrams, sketches, and HTML artifacts.
