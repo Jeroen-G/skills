@@ -9,11 +9,25 @@ The migration is done when:
 
 - every source file in the old layout appears in the mapping table,
 - no file remains in a folder that was removed,
-- imports only point down: `core` → `features` → `screens`, and any layer may
-  import shared services,
+- imports respect the layer order: `core` → `features` → `screens`, and any
+  layer may import shared services,
 - the repo's own checks pass.
 
 ## Procedure
+
+Copy this checklist and check off items as you go:
+
+```
+Migration progress:
+- [ ] Step 1: Inventory every source file and entrypoint
+- [ ] Step 2: Write the old-path → new-path table
+- [ ] Step 3: Move files mechanically and rewrite imports
+- [ ] Step 4: Verify (typecheck per batch, then tests, lint, build, run the app)
+- [ ] Step 5: Report the mapping and anything left in place
+```
+
+If a step's check fails, return to the step named in the checklist and repeat;
+only proceed when it passes.
 
 ### 1. Inventory
 
@@ -32,7 +46,7 @@ each file apply the boundary test from the skill:
 - generic UI primitive → `core/<category>/`
 - speaks the product's vocabulary, or holds its rules and data → `features/<Feature>/`
 - a full page → `screens/`
-- app-wide and not business-specific → shared services
+- app-wide and not business-specific → `src/services/`
 
 Decisions to settle in the table, not during the move:
 
@@ -58,6 +72,10 @@ Delete directories that are now empty. Move tests with the code they cover.
 Run the repo's own checks: typecheck, tests, lint, and a build or bundle step.
 The typecheck is the one that catches broken import paths, so run it after each
 batch rather than once at the end.
+
+If the typecheck fails, the imports are wrong: return to the mapping table
+(step 2), fix the entry there, and re-run the rewrite — do not patch files by
+hand. Repeat until it passes, then run tests, lint, and the build.
 
 Then exercise the app itself: start it, open the pages that were touched, and
 confirm the rendered result. A passing typecheck says the modules resolve; only

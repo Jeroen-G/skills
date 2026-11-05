@@ -1,6 +1,6 @@
 ---
 name: implement-frontend-architecture
-description: Structure and place frontend code (React / React Native) into layered folders (core, features, screens) so every component lands in a reusable, maintainable home. Use whenever creating or moving a component, screen, hook, helper, context, or deciding where a piece of frontend code belongs, even when the user doesn't mention "architecture", "layers", or "folder structure".
+description: Places frontend code (React / React Native) into layered folders — core, features, screens, shared services — so each file lands in the home that matches its intent. Use when creating or moving a component, screen, hook, or feature service, when deciding which layer a piece of frontend code belongs to (even if the user never says "architecture" or "layers"), or when migrating an existing frontend into these layers.
 metadata:
   credits:
     author: Rick
@@ -9,19 +9,16 @@ metadata:
 
 # Frontend Architecture
 
-A frontend grows into a maintenance problem when components are placed by
-convenience instead of by intent: a form filed next to a dashboard, a generic
-button buried inside a feature, a hook exported from nowhere in particular.
-The fix is a small number of **layers**, each with one job, ordered from most
-reusable to most specific. When every file lands in the layer whose job it
-does, reuse happens for free and the codebase stays navigable as it grows.
+Place code by intent, not convenience. A small number of **layers**, each with
+one job, ordered from most reusable to most specific, keeps the codebase
+navigable as it grows.
 
 ```
 core        →  features      →  screens
 (primitive)    (business)       (page)
 most reusable ─────────────────────► most specific
 
-shared services: app-wide, beside the stack
+shared services: app-wide, `src/services/`
 ```
 
 This document describes the layers and how to choose one for a new piece of
@@ -31,9 +28,9 @@ code. To move an existing codebase into these layers, follow
 ## Choosing a layer
 
 Start with the simplest question: **what job does this code do?** The answer
-picks the layer. When in doubt, prefer the more specific layer and promote
-later: it is cheaper to move code up than to untangle something wrongly made
-generic.
+picks the layer. When in doubt, prefer the more specific layer and promote it
+later: it is cheaper to promote code towards `core` than to untangle something
+wrongly made generic.
 
 1. **A generic, stateless, styled UI primitive** (button, icon, input, text,
    list) that carries no business meaning → **core**.
@@ -48,6 +45,9 @@ generic.
 The boundary test: *would this code make sense in a different app?* Yes →
 shared services. It speaks the product's vocabulary → feature services.
 
+Throughout this skill, **promote** means moving code towards `core` (more
+reusable) and **demote** means moving it towards `screens` (more specific).
+
 ## Core components
 
 The reusable foundation. A core component is **stand-alone**: it renders well
@@ -55,14 +55,10 @@ with no knowledge of the app's business, and its behaviour changes only through
 props and styling hooks. There is no shared UI kit to fall back on (web and
 native must share the same primitives), so the project builds its own.
 
-A core component:
-
-- is **generic**: it can appear anywhere in the app,
-- is **stateless**: it has no business logic, no API calls, no app context,
-- is **styled by default**: it looks right out of the box,
-- is **configured through props**: `variant: 'primary' | 'outline'`,
-  `size: 'sm' | 'lg'`, and the like,
-- accepts **styling overrides** via `className` for positioning at the call site.
+A core component is **generic** and **stateless** — no business logic, no API
+calls, no app context — **styled by default**, configured through props
+(`variant`, `size`), and accepting `className` overrides for positioning at the
+call site.
 
 Organise the `src/core/` folder by component category, following the Chakra UI
 split (layout, typography, button, form, display, feedback, …):
@@ -91,7 +87,7 @@ business logic), but they warrant their own folder beside the category folders
 rather than being forced into `display/`.
 
 > A core component that starts to know about the business (it renders a specific
-> product, it reads a specific context) has outgrown the layer. Move it down to
+> product, it reads a specific context) has outgrown the layer. Demote it to
 > `src/features/`.
 
 ## Feature components
@@ -136,8 +132,8 @@ speak the feature's vocabulary. One exported function per file.
 
 A feature may import another feature's `services/` and `hooks/`: one bounded
 context depending on another. A feature never imports another feature's
-components; promote the component to `src/core/`, or move the shared part up
-within its own feature.
+components; promote the component to `src/core/`, or move the shared part out
+to the feature root.
 
 ### Sub-features
 
@@ -154,12 +150,13 @@ src/features/OrderFlow/
 Splitting is a judgement call the whole team owns. Two signals to act on:
 
 - a feature folder becomes too large or unclear → split into sub-features;
-- a component is also used by other components → move it **up** within the
-  feature, and once it becomes fully generic, promote it to `src/core/`.
+- a component is also used by other components → move it out to the feature
+  root, and once it becomes fully generic, promote it to `src/core/`.
 
 ## Shared services
 
-The shared services location holds app-wide code that is not business-specific:
+Shared services live in `src/services/`, beside `src/core/`, `src/features/` and
+`src/screens/`. This location holds app-wide code that is not business-specific:
 the API client, auth/session, an audio engine, storage, theme, config, general
 formatters. Keep it in one place rather than forcing it into a feature.
 
