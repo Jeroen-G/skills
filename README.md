@@ -74,6 +74,10 @@ npx skills add jeroen-g/skills@entity-diff
 
 ### Experimental
 
+**deslop-codebase**
+
+: clean AI slop out of a whole codebase or module (TypeScript, PHP) without changing behavior.
+
 **entity-diff**
 
 : entity-level view of code changes via the `sem` CLI.
