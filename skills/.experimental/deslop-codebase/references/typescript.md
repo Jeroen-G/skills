@@ -40,7 +40,7 @@ Run `npx fallow` (no config needed; add `--format json --quiet` for machine outp
 | `fallow mutation` (opt-in, runs tests) | code changes no test detects | Phase 2 gaps, `test-slop` |
 | `fallow audit --base <ref>` | only findings a change introduces | per-pass check, Phase 5 gate |
 
-Add `--type-aware` when interfaces, base classes or re-exports cause false positives. Alternatives when fallow is unavailable: `knip` (unused code), `jscpd` (duplication).
+Add `--type-aware` when interfaces, base classes or re-exports cause false positives. Alternatives when fallow is unavailable: `knip` (unused code), `jscpd` (duplication). fallow reads JS/TS only: check config, CI workflows and generated files by hand or with `jscpd`.
 
 ## Lock in (Phase 5)
 
@@ -48,6 +48,7 @@ Add `--type-aware` when interfaces, base classes or re-exports cause false posit
 - typescript-eslint: `no-explicit-any`, `no-unnecessary-condition` (catches `impossible-guard`), `no-unnecessary-type-assertion`, `no-non-null-assertion`, `ban-ts-comment` (require a description), `require-await`.
 - ESLint core: `no-useless-catch`, `no-nested-ternary`, `no-else-return`.
 - `fallow audit` as PR gate (only new findings fail), or `knip` for unused files, exports and dependencies.
+- `fallow health` as a gate once it passes, so complexity and untested hot spots can't creep back.
 - Custom rules worth copying (oxlint/eslint): no chained type assertions, no conditional spreads, no widen-then-assert, max ternary depth 2.
 
 ## Greps

@@ -19,7 +19,7 @@ References, read when the step needs them:
 1. **Behavior stays the same.** Structure changes, the contract does not. A real bug found along the way goes in the report and gets its own commit only if the user agrees.
 2. **Proof, not confidence.** Tests, type check, static analysis and smoke checks stay green after every pass. If a test's assertions must change for a cut to pass, behavior changed: revert that cut. Exception: mechanical test updates where only a symbol moved (renamed, inlined or relocated, a mock of a wrapper you inlined) and the assertions stay the same; make those in their own commit and list them in the report.
 3. **Delete before you rewrite.** A cleanup never adds an abstraction to remove slop. A cut that needs a new shape becomes a Phase 4 flag.
-4. **Converge on the dominant convention, not your taste.** Pick what the majority of the code, the linter config and the project docs (CLAUDE.md, AGENTS.md, CONTRIBUTING, ADRs) use, state it once in the plan, and converge on it.
+4. **Converge on the dominant convention, not your taste.** Pick what the majority of the code, the linter config and the project docs (CLAUDE.md, AGENTS.md, CONTRIBUTING, ADRs) use, state it once in the plan, and converge on it. Agent docs can be wrong, often copied from a template: a documented convention the code doesn't follow is a question for the user, not the target.
 5. **Guard the edges, trust the inside.** Validation and error handling belong at system boundaries: HTTP requests, CLI args, env and config, database rows, files, queues, external APIs. Inside, trust types that are actually enforced (`impossible-guard`).
 6. **Public surface stays.** Entry-point exports, documented APIs, HTTP routes, CLI commands, event names, DB schema, serialized formats. "No caller in the repo" is not proof of dead code when callers live outside it or the framework calls it by name: container bindings, routes, event listeners, autowiring, `config/*.php`, Blade/Twig templates, decorators, dynamic imports, reflection, class names in strings. Unsure means keep and report.
 7. **Small commits.** At most one pass per module per commit; split a large pass by rule. Never mix with behavior changes or formatter churn.
@@ -29,7 +29,7 @@ References, read when the step needs them:
 
 - Require a clean working tree and a dedicated branch (`deslop/<scope>`), never the default branch.
 - Detect languages and frameworks (`package.json`, `tsconfig.json`, `composer.json`, `artisan`, `symfony.lock`, ...). Read the matching language reference.
-- Write an exclusion list kept out of every pass: `vendor/`, `node_modules/`, build output, generated code, migrations that already ran, test snapshots and fixtures, vendored third-party code.
+- Write an exclusion list kept out of every pass: `vendor/`, `node_modules/`, build output, generated code, migrations that already ran, test snapshots and fixtures, vendored third-party code, agent worktrees (`.claude/worktrees/`). Check that the test runner and analyzers skip worktrees inside the repo, or they run every copy of the tests.
 - Run the verification commands for a baseline: tests, type check, lint, plus framework smoke checks (`php artisan route:list`, `php artisan config:cache`, `bin/console lint:container`, the production build). Pre-existing failures are baseline; don't fix them silently.
 - No tests or no type checker? Say so, and propose adding one at the level that passes today before Pass C.
 - Check which analyzers are available. Propose missing ones; don't add dev dependencies without the user's go.
@@ -38,6 +38,7 @@ References, read when the step needs them:
 
 - Map modules and rank them by churn (`git log --since=1.year --format= --name-only | sort | uniq -c | sort -rn | head -50`), size and slop density.
 - Run the analyzers first, then the greps, then read the hits. Count hits per rule. A tool finding is a lead, not a verdict: check it against ground rule 6.
+- Check each planned cut against history (`git log -S '<symbol>'`): a cut that was made before and reverted is a question for the user, not a cut.
 - Present the plan: exclusion list, chosen conventions, module order, counts per module, modules without a behavior pin, early Phase 4 flags.
 - Interactive: get the user's go before Phase 3. Unattended: run Pass A and B only.
 
@@ -51,9 +52,9 @@ After each pass: run verification and smoke checks, revert any cut that turned s
 
 | Pass                              | Needs      | Rules                                                                                                                                                                                                                           |
 |-----------------------------------|------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| A, mechanical                     | nothing    | `narrating-comment`, `dead-comment`, `debug-residue`, `deep-nesting`, `stray-artifact`, and `unused-code` for imports, locals and private methods                                                                               |
+| A, mechanical                     | nothing    | `narrating-comment`, `dead-comment`, `debug-residue`, `deep-nesting`, `stray-artifact`, `scaffold-residue`, and `unused-code` for imports, locals and private methods                                                           |
 | B, local                          | type proof | `impossible-guard`, `type-silencer`, `ceremony`, the rest of `unused-code`                                                                                                                                                      |
-| C, failure behavior and structure | pin        | `defensive-wrapper`, `repeated-validation`, `silent-fallback`, `one-caller-wrapper`, `speculative-generality`, `reimplemented-helper`, `duplicated-type`, `copy-paste`, `dead-compat-path`, `fake-implementation` (report only) |
+| C, failure behavior and structure | pin        | `defensive-wrapper`, `repeated-validation`, `silent-fallback`, `one-caller-wrapper`, `speculative-generality`, `reimplemented-helper`, `duplicated-type`, `copy-paste`, `dead-compat-path`, `unsynced-copy`, `fake-implementation` (report only) |
 | D, naming and tests               | pin        | `naming-slop`, `test-slop`                                                                                                                                                                                                      |
 
 Always: `keep-comment`, `unrelated-churn`, `hidden-behavior-change`. `competing-conventions` is always a Phase 4 flag.
@@ -79,7 +80,7 @@ Do accepted ones one at a time with the user, behind a pin. Migrate every caller
 
 ## Phase 5: Lock it in
 
-Turn recurring rule hits into tooling in CI, from the language reference. Save a baseline and gate only on new findings, so the gate goes in before the backlog is gone. Auto-fixers run as their own reviewed commits after a dry run; fixers that change runtime contracts are separate changes, never part of a pass. Write conventions tooling can't enforce into CLAUDE.md or AGENTS.md, briefly.
+Turn recurring rule hits into tooling in CI, from the language reference. Give every `unsynced-copy` its drift check. Save a baseline and gate only on new findings, so the gate goes in before the backlog is gone. Auto-fixers run as their own reviewed commits after a dry run; fixers that change runtime contracts are separate changes, never part of a pass. Write conventions tooling can't enforce into CLAUDE.md or AGENTS.md, briefly.
 
 ## Report
 
@@ -90,6 +91,6 @@ Start with one to three sentences. Then, per module:
 - tests changed or removed, each with the reason (rule 2 exception, `test-slop`)
 - Phase 4 flags with strength
 - public-surface items left in place (rule 6)
-- `defensive-wrapper` and `silent-fallback` items reported instead of cut, `fake-implementation` items, `stray-artifact` files awaiting confirmation, suspected bugs
+- `defensive-wrapper` and `silent-fallback` items reported instead of cut, `fake-implementation` items, `stray-artifact` and `scaffold-residue` files awaiting confirmation, suspected bugs
 - a "did not touch" list
 - verification and smoke-check commands with results, baseline vs after
